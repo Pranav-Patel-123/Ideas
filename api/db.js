@@ -3,10 +3,10 @@ import mongoose from "mongoose";
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
-  throw new Error("❌ Please define the MONGODB_URI environment variable inside .env");
+  throw new Error("Please define the MONGODB_URI environment variable inside .env");
 }
 
-// Maintain a cached connection across hot reloads in development
+// Use global cache to prevent multiple connections during hot reloads
 let cached = global._mongooseCache;
 
 if (!cached) {
@@ -14,26 +14,15 @@ if (!cached) {
 }
 
 export async function connect() {
-  if (cached.conn) {
-    return cached.conn;
-  }
+  if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
-    const options = {
+    const opts = {
       bufferCommands: false,
-      dbName: process.env.MONGODB_DB || undefined, // Optional DB name
+      dbName: process.env.MONGODB_DB || undefined,
     };
 
-    cached.promise = mongoose
-      .connect(MONGODB_URI, options)
-      .then((mongooseInstance) => {
-        console.log("✅ MongoDB connected");
-        return mongooseInstance;
-      })
-      .catch((err) => {
-        console.error("❌ MongoDB connection error:", err);
-        throw err;
-      });
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then((m) => m);
   }
 
   cached.conn = await cached.promise;
