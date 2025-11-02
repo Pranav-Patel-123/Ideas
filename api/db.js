@@ -10,7 +10,6 @@ interface Cached {
   promise: Promise<typeof mongoose> | null;
 }
 
-// ✅ Declare the global cache safely for TypeScript
 let cached: Cached = (global as any).mongoose;
 
 if (!cached) {
