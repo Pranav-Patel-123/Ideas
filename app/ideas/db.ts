@@ -8,7 +8,7 @@ const DB_VERSION = 1;
  * Represents a single idea object
  */
 export interface Idea {
-  _id?: number;
+  _id?: number; // Keep number since IndexedDB autoIncrement uses number
   title: string;
   description: string;
   createdAt?: string;
@@ -33,7 +33,7 @@ export async function getDb(): Promise<IDBPDatabase> {
  */
 export async function saveIdea(idea: Idea): Promise<void> {
   const db = await getDb();
-  await db.put(STORE_NAME, idea);
+  await db.put(STORE_NAME, { ...idea, createdAt: idea.createdAt || new Date().toISOString() });
 }
 
 /**
@@ -42,7 +42,11 @@ export async function saveIdea(idea: Idea): Promise<void> {
  */
 export async function getAllIdeas(): Promise<Idea[]> {
   const db = await getDb();
-  return db.getAll(STORE_NAME) as Promise<Idea[]>;
+  const ideas = await db.getAll(STORE_NAME);
+  return ideas.map((idea) => ({
+    ...idea,
+    _id: Number(idea._id), // ensure _id is always a number
+  })) as Idea[];
 }
 
 /**
