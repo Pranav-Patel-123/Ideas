@@ -1,14 +1,17 @@
+/** @type {import('next').NextConfig} */
+import type { NextConfig } from "next";
+import withPWAInit from "next-pwa";
 
-
-import type { NextConfig } from 'next';
-const nextConfig: NextConfig = {
-  /* config options here */
-};
-
-const withPWA = require('next-pwa')({
-  dest: 'public',
+const withPWA = withPWAInit({
+  dest: "public",
   register: true,
   skipWaiting: true,
 });
 
-module.exports = withPWA(nextConfig);
+const nextConfig: NextConfig = {
+  experimental: {
+    turbo: false, // 👈 force Webpack instead of Turbopack
+  },
+};
+
+export default withPWA(nextConfig);
