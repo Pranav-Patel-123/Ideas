@@ -1,16 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { openDB, IDBPDatabase } from "idb";
 
-import { openDB } from "idb";
+interface Idea {
+  _id?: number;
+  title: string;
+  description: string;
+}
 
 const DB_NAME = "ideas-app";
 const STORE_NAME = "ideas";
 const DB_VERSION = 1;
 
-/**
- * Open or create the IndexedDB database
- */
-export async function getDb() {
+export async function getDb(): Promise<IDBPDatabase> {
   return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       if (!db.objectStoreNames.contains(STORE_NAME)) {
@@ -20,54 +20,22 @@ export async function getDb() {
   });
 }
 
-/**
- * Save or update an idea
- * @param {Object} idea - The idea object to save
- */
-export async function saveIdea(idea) {
-  try {
-    const db = await getDb();
-    await db.put(STORE_NAME, idea);
-  } catch (err) {
-    console.error("Error saving idea:", err);
-  }
+export async function saveIdea(idea: Idea): Promise<void> {
+  const db = await getDb();
+  await db.put(STORE_NAME, idea);
 }
 
-/**
- * Retrieve all ideas
- * @returns {Promise<Array>} List of ideas
- */
-export async function getAllIdeas() {
-  try {
-    const db = await getDb();
-    return await db.getAll(STORE_NAME);
-  } catch (err) {
-    console.error("Error fetching ideas:", err);
-    return [];
-  }
+export async function getAllIdeas(): Promise<Idea[]> {
+  const db = await getDb();
+  return db.getAll(STORE_NAME);
 }
 
-/**
- * Delete a specific idea by its ID
- * @param {string|number} id - The idea's key (_id)
- */
-export async function deleteIdea(id) {
-  try {
-    const db = await getDb();
-    await db.delete(STORE_NAME, id);
-  } catch (err) {
-    console.error("Error deleting idea:", err);
-  }
+export async function deleteIdea(id: number): Promise<void> {
+  const db = await getDb();
+  await db.delete(STORE_NAME, id);
 }
 
-/**
- * Clear all ideas from the database
- */
-export async function clearIdeas() {
-  try {
-    const db = await getDb();
-    await db.clear(STORE_NAME);
-  } catch (err) {
-    console.error("Error clearing ideas:", err);
-  }
+export async function clearIdeas(): Promise<void> {
+  const db = await getDb();
+  await db.clear(STORE_NAME);
 }
